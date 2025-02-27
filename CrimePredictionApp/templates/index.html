@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Prediction System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 20px;
+            color: #444;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f5ff;
+            border: 1px solid #b3d8ff;
+            border-radius: 10px;
+            color: #004085;
+            font-weight: bold;
+            display: none;
+        }
+
+        .footer {
+            margin-top: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crime Prediction System</h1>
+    <p>Predict the type of crime that may occur based on location, time, and other features. The model uses XGBoost for accurate predictions. Please fill in the details below:</p>
+
+    <form id="crimeForm" action="/predict" method="post">
+        <label for="lat">Latitude:</label>
+        <input type="number" step="0.000001" name="Lat" id="lat" required>
+
+        <label for="lon">Longitude:</label>
+        <input type="number" step="0.000001" name="Lon" id="lon" required>
+
+        <label for="hour">Hour:</label>
+        <input type="number" name="Hour" id="hour" min="0" max="23" required>
+
+        <label for="minute">Minute:</label>
+        <input type="number" name="Minute" id="minute" min="0" max="59" required>
+
+        <label for="day">Day:</label>
+        <input type="number" name="Day" id="day" min="1" max="31" required>
+
+        <label for="month">Month:</label>
+        <select name="Month" id="month" required>
+            <option value="" disabled selected>Select a month</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+
+        <label for="area_name">Area Name:</label>
+        <select name="Area Name" id="area_name" required>
+            <option value="0">0 77th Street</option>
+            <option value="1">1 Central</option>
+            <option value="2">2 Devonshire</option>
+            <option value="3">3 Foothill</option>
+            <option value="4">4 Harbor</option>
+            <option value="5">5 Hollenbeck</option>
+            <option value="6">6 Hollywood</option>
+            <option value="7">7 Mission</option>
+            <option value="8">8 N Hollywood</option>
+            <option value="9">9 Newton</option>
+            <option value="10">10 Northeast</option>
+            <option value="11">11 Olympic</option>
+            <option value="12">12 Pacific</option>
+            <option value="13">13 Rampart</option>
+            <option value="14">14 Southeast</option>
+            <option value="15">15 Southwest</option>
+            <option value="16">16 Topanga</option>
+            <option value="17">17 Van Nuys</option>
+            <option value="18">18 West LA</option>
+            <option value="19">19 West Valley</option>
+            <option value="20">20 Wilshire</option>
+        </select><br>
+
+        <label for="premis_desc">Premises Description:</label>
+        <select name="Premis Desc" id="premis_desc" required>
+            <option value="0">0 7TH AND METRO CENTER (NOT LINE SPECIFIC)</option>
+            <option value="1">1 ABANDONED BUILDING ABANDONED HOUSE</option>
+            <option value="2">2 ABATEMENT LOCATION</option>
+            <option value="3">3 ABORTION CLINIC/ABORTION FACILITY</option>
+            <option value="4">4 AIRCRAFT</option>
+            <option value="5">5 ALLEY</option>
+            <option value="6">6 AMTRAK TRAIN</option>
+            <option value="7">7 AMUSEMENT PARK</option>
+            <option value="8">8 APARTMENT/CONDO COMMON LAUNDRY ROOM</option>
+            <option value="9">9 ARCADE,GAME ROOM/VIDEO GAMES</option>
+            <option value="10">10 AUTO DEALERSHIP</option>
+            <option value="11">11 AUTO REPAIR SHOP</option>
+            <option value="12">12 AUTO SALES LOT</option>
+            <option value="13">13 AUTO SUPPLY STORE</option>
+            <option value="14">14 AUTOMATED TELLER MACHINE (ATM)</option>
+            <option value="15">15 BALCONY</option>
+            <option value="16">16 BANK</option>
+            <option value="17">17 BANK DROP BOX/MONEY DROP-OUTSIDE OF BANK</option>
+            <option value="18">18 BANKING INSIDE MARKET-STORE</option>
+            <option value="19">19 BAR/COCKTAIL/NIGHTCLUB</option>
+            <option value="20">20 BAR/SPORTS BAR (OPEN DAY & NIGHT)</option>
+            <option value="21">21 BASKETBALL COURTS</option>
+            <option value="22">22 BEACH</option>
+            <option value="23">23 BEAUTY SUPPLY STORE</option>
+            <option value="24">24 BEAUTY/BARBER SHOP</option>
+            <option value="25">25 BOOK STORE</option>
+            <option value="26">26 BOWLING ALLEY</option>
+            <option value="27">27 BUS DEPOT/TERMINAL, OTHER THAN MTA</option>
+            <option value="28">28 BUS STOP</option>
+            <option value="29">29 BUS STOP/LAYOVER</option>
+            <option value="30">30 BUS, SCHOOL, CHURCH</option>
+            <option value="31">31 BUS-CHARTER/PRIVATE</option>
+            <option value="32">32 CAR WASH</option>
+            <option value="33">33 CATERING/ICE CREAM TRUCK</option>
+            <option value="34">34 CELL PHONE STORE</option>
+            <option value="35">35 CEMETARY</option>
+            <option value="36">36 CHECK CASHING</option>
+            <option value="37">37 CHEMICAL STORAGE/MANUFACTURING PLANT</option>
+            <option value="38">38 CHURCH/CHAPEL</option>
+            <option value="39">39 CLEANER/LAUNDROMAT</option>
+            <option value="40">40 CLOTHING STORE</option>
+            <option value="41">41 COFFEE SHOP</option>
+            <option value="42">42 COLISEUM</option>
+            <option value="43">43 COLLEGE/JUNIOR COLLEGE/UNIVERSITY</option>
+            <option value="44">44 COMPUTER SERVICES/REPAIRS/SALES</option>
+            <option value="45">45 CONDOMINIUM/TOWNHOUSE</option>
+            <option value="46">46 CONSTRUCTION SITE</option>
+            <option value="47">47 CONVENTION CENTER</option>
+            <option value="48">48 CREDIT UNION</option>
+            <option value="49">49 CYBERSPACE</option>
+            <option value="50">50 DAM/RESERVOIR</option>
+            <option value="51">51 DAY CARE/ADULTS</option>
+            <option value="52">52 DAY CARE/CHILDREN</option>
+            <option value="53">53 DELIVERY SERVICE (FED EX, UPS, COURIERS)</option>
+            <option value="54">54 DEPARTMENT STORE</option>
+            <option value="55">55 DEPT OF DEFENSE FACILITY</option>
+            <option value="56">56 DETENTION/JAIL FACILITY</option>
+            <option value="57">57 DISCOUNT STORE</option>
+            <option value="58">58 DIY CENTER (LOWE'S, HOME DEPOT)</option>
+            <option value="59">59 DODGER STADIUM</option>
+            <option value="60">60 DRIVE THRU BANKING (WINDOW)</option>
+            <option value="61">61 DRIVE THRU</option>
+            <option value="62">62 DRIVEWAY</option>
+            <option value="63">63 DRUG STORE</option>
+            <option value="64">64 ELECTRONICS STORE</option>
+            <option value="65">65 ELEMENTARY SCHOOL</option>
+            <option value="66">66 ELEVATOR</option>
+            <option value="67">67 ENERGY PLANT/FACILITY</option>
+            <option value="68">68 ENTERTAINMENT/COMEDY CLUB</option>
+            <option value="69">69 EQUIPMENT RENTAL</option>
+            <option value="70">70 ESCALATOR</option>
+            <option value="71">71 FACTORY</option>
+            <option value="72">72 FINANCE COMPANY</option>
+            <option value="73">73 FIRE STATION</option>
+            <option value="74">74 FOSTER HOME BOYS OR GIRLS</option>
+            <option value="75">75 FRAT HOUSE/SORORITY/DORMITORY</option>
+            <option value="76">76 FREEWAY</option>
+            <option value="77">77 FURNITURE STORE</option>
+            <option value="78">78 GARAGE/CARPORT</option>
+            <option value="79">79 GARMENT MANUFACTURER</option>
+            <option value="80">80 GAS STATION</option>
+            <option value="81">81 GOLF COURSE</option>
+            <option value="82">82 GOVERNMENT FACILITY</option>
+            <option value="83">83 GREYHOUND OR INTERSTATE BUS</option>
+            <option value="84">84 GROUP HOME</option>
+            <option value="85">85 GUN/SPORTING GOODS</option>
+            <option value="86">86 HANDBALL COURTS</option>
+            <option value="87">87 HARDWARE/BUILDING SUPPLY</option>
+            <option value="88">88 HEALTH SPA/GYM</option>
+            <option value="89">89 HIGH SCHOOL</option>
+            <option value="90">90 HIGH-RISE BUILDING</option>
+            <option value="91">91 HOSPICE</option>
+            <option value="92">92 HOSPITAL</option>
+            <option value="93">93 HOTEL</option>
+            <option value="94">94 JEWELRY STORE</option>
+            <option value="95">95 JUNIOR HIGH SCHOOL</option>
+            <option value="96">96 LA UNION STATION (NOT LINE SPECIFIC)</option>
+            <option value="97">97 LAUNDROMAT</option>
+            <option value="98">98 LIBRARY</option>
+            <option value="99">99 LIQUOR STORE</option>
+            <option value="100">100 MAIL BOX</option>
+            <option value="101">101 MANUFACTURING COMPANY</option>
+            <option value="102">102 MARKET</option>
+            <option value="103">103 MASS GATHERING LOCATION</option>
+            <option value="104">104 MASSAGE PARLOR</option>
+            <option value="105">105 MEDICAL MARIJUANA FACILITIES/BUSINESSES</option>
+            <option value="106">106 MEDICAL/DENTAL OFFICES</option>
+            <option value="107">107 MEMBERSHIP STORE</option>
+            <option value="108">108 METHADONE CLINIC</option>
+            <option value="109">109 METROLINK TRAIN</option>
+            <option value="110">110 MINI-MART</option>
+            <option value="111">111 MISSIONS/SHELTERS</option>
+            <option value="112">112 MOBILE HOME/TRAILERS/CONSTRUCTION TRAILERS</option>
+            <option value="113">113 MORTUARY</option>
+            <option value="114">114 MOSQUE</option>
+            <option value="115">115 MOTEL</option>
+            <option value="116">116 MTA - BLUE LINE - 103RD/WATTS TOWERS</option>
+            <option value="117">117 MTA - BLUE LINE - 7TH AND METRO CENTER</option>
+            <option value="118">118 MTA - BLUE LINE - GRAND/LATTC</option>
+            <option value="119">119 MTA - BLUE LINE - PICO</option>
+            <option value="120">120 MTA - BLUE LINE - SAN PEDRO</option>
+            <option value="121">121 MTA - BLUE LINE - VERNON</option>
+            <option value="122">122 MTA - BLUE LINE - WASHINGTON</option>
+            <option value="123">123 MTA - EXPO LINE - 7TH AND METRO CENTER</option>
+            <option value="124">124 MTA - EXPO LINE - EXPO PARK/USC</option>
+            <option value="125">125 MTA - EXPO LINE - JEFFERSON/USC</option>
+            <option value="126">126 MTA - EXPO LINE - LATTC</option>
+            <option value="127">127 MTA - EXPO LINE - LAKE</option>
+            <option value="128">128 MTA - EXPO LINE - OLYMPIC/9TH</option>
+            <option value="129">129 MTA - EXPO LINE - PICO</option>
+            <option value="130">130 MTA - EXPO LINE - SANTEE</option>
+            <option value="131">131 MTA - EXPO LINE - USC/EXPO PARK</option>
+            <option value="132">132 MTA - RED LINE - 7TH AND METRO CENTER</option>
+            <option value="133">133 MTA - RED LINE - HOLLYWOOD</option>
+            <option value="134">134 MTA - RED LINE - UNIVERSAL CITY</option>
+            <option value="135">135 MTA - RED LINE - WEST LA</option>
+            <option value="136">136 MULTIFAMILY DWELLING</option>
+            <option value="137">137 MULTI-USE (BUSINESS/RESIDENTIAL)</option>
+            <option value="138">138 MUSEUM</option>
+            <option value="139">139 OFFICE BUILDING</option>
+            <option value="140">140 OPERA HOUSE</option>
+            <option value="141">141 PARKING LOT</option>
+            <option value="142">142 PARKING STRUCTURE (MULTI-LEVEL)</option>
+            <option value="143">143 PARKS</option>
+            <option value="144">144 PET STORE</option>
+            <option value="145">145 PHARMACY</option>
+            <option value="146">146 PLANT</option>
+            <option value="147">147 PLAZA</option>
+            <option value="148">148 POST OFFICE</option>
+            <option value="149">149 POSTAL FACILITY (USPS)</option>
+            <option value="150">150 PRISON/JAIL</option>
+            <option value="151">151 RAILROAD</option>
+            <option value="152">152 RESCUE MISSION</option>
+            <option value="153">153 RESTAURANT</option>
+            <option value="154">154 RETAIL</option>
+            <option value="155">155 SCHOOL</option>
+            <option value="156">156 SHOPPING CENTER</option>
+            <option value="157">157 SKATE PARK</option>
+            <option value="158">158 SPA/MASSAGE</option>
+            <option value="159">159 SPECIALIZED SHOP (TAXI, SHUTTLE, ETC)</option>
+            <option value="160">160 STADIUM</option>
+            <option value="161">161 STORAGE FACILITY</option>
+            <option value="162">162 SWIMMING POOL</option>
+            <option value="163">163 SYNAGOGUE</option>
+            <option value="164">164 TELEPHONE COMPANY</option>
+            <option value="165">165 THEATER</option>
+            <option value="166">166 TOLL BOOTH</option>
+            <option value="167">167 TRANSIT HUB/INTERMODAL STATION</option>
+            <option value="168">168 TRUCKING COMPANY</option>
+            <option value="169">169 UNDER CONSTRUCTION</option>
+            <option value="170">170 UNIVERSITY CAMPUS</option>
+            <option value="171">171 VACANT LOT</option>
+            <option value="172">172 VAN/SCHOOL BUS</option>
+            <option value="173">173 VETERINARY CLINIC</option>
+            <option value="174">174 WATER PARK</option>
+            <option value="175">175 WAREHOUSE</option>
+            <option value="176">176 WATER SUPPLY COMPANY</option>
+            <option value="177">177 WASTE DISPOSAL COMPANY</option>
+            <option value="178">178 WEIGHT LOSS CLINIC</option>
+            <option value="179">179 WELLNESS CENTER</option>
+            <option value="180">180 WHOLESALE STORE</option>
+            <option value="181">181 WIC/SNAP</option>
+            <option value="182">182 YARD SALE</option>
+            <option value="183">183 YOGA/STUDIO</option>
+            <option value="184">184 YOUTH CENTER</option>
+            <option value="185">185 ZOO</option>
+            <option value="186">186 ZUMBA STUDIO</option>
+            <option value="187">187 HIKING TRAIL</option>
+            <option value="188">188 CIRCUS</option>
+            <option value="189">189 TRAMPOLINE PARK</option>
+            <option value="190">190 GYMNASIUM</option>
+            <option value="191">191 FLEA MARKET</option>
+            <option value="192">192 HORSE STABLES</option>
+            <option value="193">193 INDOOR SWIMMING POOL</option>
+            <option value="194">194 OUTDOOR SWIMMING POOL</option>
+            <option value="195">195 AIRPORT</option>
+            <option value="196">196 LUXURY HOTEL</option>
+            <option value="197">197 HISTORICAL SITE</option>
+            <option value="198">198 SPORTS FIELD</option>
+            <option value="199">199 AMPHITHEATER</option>
+            <option value="200">200 MARKETPLACE</option>
+            <option value="201">201 CONCERT VENUE</option>
+            <option value="202">202 CHINESE FOOD RESTAURANT</option>
+            <option value="203">203 ITALIAN RESTAURANT</option>
+            <option value="204">204 FAST FOOD RESTAURANT</option>
+            <option value="205">205 KOSHER FOOD ESTABLISHMENT</option>
+            <option value="206">206 FOOD TRUCK</option>
+            <option value="207">207 HOTEL LOBBY</option>
+            <option value="208">208 TATTOO SHOP</option>
+            <option value="209">209 WINERY</option>
+            <option value="210">210 BARBERSHOP</option>
+            <option value="211">211 BEAUTY SALON</option>
+            <option value="212">212 ICE SKATING RINK</option>
+            <option value="213">213 WINTER SPORTS FACILITY</option>
+            <option value="214">214 PARKING METER</option>
+            <option value="215">215 PUBLIC RESTROOM</option>
+            <option value="216">216 INDUSTRIAL SITE</option>
+            <option value="217">217 NURSERY/GARDEN CENTER</option>
+            <option value="218">218 PETTING ZOO</option>
+            <option value="219">219 RODEO</option>
+            <option value="220">220 LANDFILL</option>
+            <option value="221">221 SHELTER</option>
+            <option value="222">222 COMMUNITY CENTER</option>
+            <option value="223">223 LIVESTOCK FARM</option>
+            <option value="224">224 FARMERS MARKET</option>
+            <option value="225">225 FUNERAL HOME</option>
+            <option value="226">226 MINING SITE</option>
+            <option value="227">227 TIMBER HARVESTING SITE</option>
+            <option value="228">228 WINERY</option>
+            <option value="229">229 BAKERY</option>
+            <option value="230">230 CANDY STORE</option>
+            <option value="231">231 CHEESE FACTORY</option>
+            <option value="232">232 BUTCHER SHOP</option>
+            <option value="233">233 MILK PROCESSING PLANT</option>
+            <option value="234">234 SAUSAGE MAKER</option>
+            <option value="235">235 ICE CREAM PARLOR</option>
+            <option value="236">236 DELI</option>
+            <option value="237">237 FRUIT STAND</option>
+            <option value="238">238 VEGETABLE MARKET</option>
+            <option value="239">239 FISH MARKET</option>
+            <option value="240">240 COFFEE BEAN ROASTER</option>
+            <option value="241">241 BREWERY</option>
+            <option value="242">242 DISTILLERY</option>
+            <option value="243">243 WINERY</option>
+            <option value="244">244 TIKI BAR</option>
+            <option value="245">245 CIGAR LOUNGE</option>
+            <option value="246">246 PUB</option>
+            <option value="247">247 NIGHTCLUB</option>
+            <option value="248">248 CASINO</option>
+            <option value="249">249 ART GALLERY</option>
+            <option value="250">250 MUSIC VENUE</option>
+            <option value="251">251 COMEDY CLUB</option>
+            <option value="252">252 OPERA HOUSE</option>
+            <option value="253">253 THEATER</option>
+            <option value="254">254 COMMUNITY THEATER</option>
+            <option value="255">255 FILM STUDIO</option>
+            <option value="256">256 BROADWAY THEATER</option>
+            <option value="257">257 FILM FESTIVAL</option>
+            <option value="258">258 OPEN-AIR MARKET</option>
+            <option value="259">259 MALL</option>
+            <option value="260">260 SUPERMARKET</option>
+            <option value="261">261 FARMERS MARKET</option>
+            <option value="262">262 FLEA MARKET</option>
+            <option value="263">263 SHOPPING MALL</option>
+            <option value="264">264 SHOPPING PLAZA</option>
+            <option value="265">265 RETAIL STORE</option>
+            <option value="266">266 DEPARTMENT STORE</option>
+            <option value="267">267 BOUTIQUE</option>
+            <option value="268">268 SHOPPING CENTER</option>
+            <option value="269">269 WAREHOUSE</option>
+            <option value="270">270 DISTRIBUTION CENTER</option>
+            <option value="271">271 CONVENIENCE STORE</option>
+            <option value="272">272 GAS STATION</option>
+            <option value="273">273 SUPPLY STORE</option>
+            <option value="274">274 AUTO PARTS STORE</option>
+            <option value="275">275 HARDWARE STORE</option>
+            <option value="276">276 GROCERY STORE</option>
+            <option value="277">277 DRUGSTORE</option>
+            <option value="278">278 PHARMACY</option>
+            <option value="279">279 HOME IMPROVEMENT STORE</option>
+            <option value="280">280 FURNITURE STORE</option>
+            <option value="281">281 APPAREL STORE</option>
+            <option value="282">282 ELECTRONICS STORE</option>
+            <option value="283">283 TOY STORE</option>
+            <option value="284">284 BOOKSTORE</option>
+            <option value="285">285 MUSIC STORE</option>
+            <option value="286">286 CRAFT STORE</option>
+            <option value="287">287 ANTIQUE STORE</option>
+            <option value="288">288 ART STORE</option>
+            <option value="289">289 PET STORE</option>
+            <option value="290">290 MATTRESS STORE</option>
+            <option value="291">291 CLOTHING BOUTIQUE</option>
+            <option value="292">292 FARM MARKET</option>
+        </select><br>
+
+
+        <label for="Time Period">Time Period:</label>
+        <select name="Time Period" id="Time Period" required>
+            <option value="" disabled selected>Select a time period</option>
+            <option value="0">0 Early Morning</option>
+            <option value="1">1 Evening</option>
+            <option value="2">2 Morning</option>
+            <option value="3">3 Night</option>
+            <option value="4">4 Noon</option>
+        </select>
+
+        <label for="Day of Week">Day of Week:</label>
+        <select name="Day of Week" id="Day of Week" required>
+            <option value="" disabled selected>Select a day</option>
+            <option value="0">0 Friday</option>
+            <option value="1">1 Monday</option>
+            <option value="2">2 Saturday</option>
+            <option value="3">3 Sunday</option>
+            <option value="4">4 Thursday</option>
+            <option value="5">5 Tuesday</option>
+            <option value="6">6 Wednesday</option>
+        </select>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="output">PLEASE PAY MORE FOCUS ON: <span id="crimePrediction"></span></div>
+
+    <footer class="footer">
+        Powered by XGBoost Model for Crime Prediction
+    </footer>
+
+    <script>
+        const form = document.getElementById('crimeForm');
+        const outputDiv = document.getElementById('output');
+        const crimePrediction = document.getElementById('crimePrediction');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(form);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                crimePrediction.textContent = data.prediction || 'Unknown';
+                outputDiv.style.display = 'block';
+            } else {
+                alert('An error occurred while predicting the crime.');
+            }
+        });
+    </script>
+</body>
+</html>
